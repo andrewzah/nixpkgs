@@ -2,7 +2,7 @@
   lib,
   stdenv,
   fetchFromGitHub,
-  #fetchpatch,
+  fetchpatch,
   cmake,
   pkg-config,
   wrapQtAppsHook,
@@ -11,9 +11,7 @@
   qtbase,
   python3,
 }:
-
 stdenv.mkDerivation rec {
-
   pname = "nano-wallet";
   version = "28.2";
 
@@ -25,18 +23,15 @@ stdenv.mkDerivation rec {
     hash = "sha256-Wo1Gd6dOnCoPiGmuJQhZmKKSg7LrKpfdvLNNKBYTUWI=";
   };
 
-  #patches = [
-  #  # Fix gcc-13 build failure due to missing <cstdint> includes.
-  #  (fetchpatch {
-  #    name = "gcc-13.patch";
-  #    url = "https://github.com/facebook/rocksdb/commit/88edfbfb5e1cac228f7cc31fbec24bb637fe54b1.patch";
-  #    stripLen = 1;
-  #    extraPrefix = "submodules/rocksdb/";
-  #    hash = "sha256-HhlIYyPzIZFuyzHTUPz3bXgXiaFSQ8pVrLLMzegjTgE=";
-  #  })
-  #];
-
   env.NIX_CFLAGS_COMPILE = "-Wno-error";
+
+  patches = [
+    # fix issue with <algorithm> include
+    (fetchpatch {
+      url = "https://github.com/nanocurrency/nano-node/commit/1835a04dbbd1f6970649d7f72c454831432dd01f.patch";
+      hash = "sha256-IpC4yaIbJzQWYIC0QGXYQ345g6JnD2+xZG30qAQ1ubo=";
+    })
+  ];
 
   cmakeFlags =
     let
@@ -80,10 +75,9 @@ stdenv.mkDerivation rec {
     description = "Wallet for Nano cryptocurrency";
     homepage = "https://nano.org/en/wallet/";
     license = lib.licenses.bsd2;
+    maintainers = with lib.maintainers; [ jluttine ];
     # Fails on Darwin. See:
     # https://github.com/NixOS/nixpkgs/pull/39295#issuecomment-386800962
     platforms = lib.platforms.linux;
-    maintainers = with lib.maintainers; [ jluttine ];
   };
-
 }
